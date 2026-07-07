@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { 
   calculateWP, 
   calculateTOPSIS 
@@ -87,6 +87,34 @@ function App() {
   const totalWeight = criteria.reduce((sum, c) => sum + c.weight, 0);
   const isWeightValid = Math.abs(totalWeight - 1.00) < 0.001;
 
+  // Validation for decision matrix values
+  const isMatrixValid = useMemo(() => {
+    return alternatives.every(alt =>
+      criteria.every(c => {
+        const val = alt.values[c.id];
+        if (val === undefined || val === null || isNaN(val)) return false;
+        if (c.id === 'c1' || c.id === 'c2' || c.id === 'c4') {
+          // Must be an integer between 1 and 5
+          return Number.isInteger(val) && val >= 1 && val <= 5;
+        }
+        // Weight (c3) and Price (c5) must be positive values
+        return val > 0;
+      })
+    );
+  }, [criteria, alternatives]);
+
+  // Helper to check if a specific matrix cell is invalid
+  const isValInvalid = (altId: string, critId: string) => {
+    const alt = alternatives.find(a => a.id === altId);
+    if (!alt) return true;
+    const val = alt.values[critId];
+    if (val === undefined || val === null || isNaN(val) || val <= 0) return true;
+    if (critId === 'c1' || critId === 'c2' || critId === 'c4') {
+      return !Number.isInteger(val) || val < 1 || val > 5;
+    }
+    return false;
+  };
+
   // Handle criteria weight changes
   const handleWeightChange = (id: string, value: number) => {
     // Round to 2 decimal places to avoid floating point issues
@@ -97,7 +125,24 @@ function App() {
   };
 
   // Handle matrix value changes
-  const handleValueChange = (altId: string, critId: string, value: number) => {
+  const handleValueChange = (altId: string, critId: string, valueStr: string) => {
+    let val = parseFloat(valueStr);
+    if (isNaN(val)) {
+      val = 0; // Empty / invalid field representation
+    }
+
+    const isScale1to5 = critId === 'c1' || critId === 'c2' || critId === 'c4';
+
+    if (isScale1to5 && val !== 0) {
+      // Clamp between 1 and 5
+      if (val < 1) val = 1;
+      if (val > 5) val = 5;
+      val = Math.round(val);
+    } else if (val !== 0) {
+      // Enforce positive number for weight and price
+      if (val < 0) val = 0;
+    }
+
     setAlternatives(prev =>
       prev.map(alt => {
         if (alt.id === altId) {
@@ -105,7 +150,7 @@ function App() {
             ...alt,
             values: {
               ...alt.values,
-              [critId]: value,
+              [critId]: val,
             },
           };
         }
@@ -307,30 +352,51 @@ function App() {
                         <span className="alt-desc">{alt.description}</span>
                       </div>
                     </td>
-                    {criteria.map(c => (
-                      <td key={c.id}>
-                        <div className="cell-input-wrapper">
-                          <input
-                            type="number"
-                            min="0"
-                            value={alt.values[c.id]}
-                            onChange={(e) => handleValueChange(alt.id, c.id, parseFloat(e.target.value) || 0)}
-                            className="cell-input"
-                          />
-                        </div>
-                      </td>
-                    ))}
+                    {criteria.map(c => {
+                      const isScale = c.id === 'c1' || c.id === 'c2' || c.id === 'c4';
+                      const isInvalid = isValInvalid(alt.id, c.id);
+                      return (
+                        <td key={c.id}>
+                          <div className="cell-input-wrapper">
+                            <input
+                              type="number"
+                              min={isScale ? 1 : 1}
+                              max={isScale ? 5 : undefined}
+                              value={alt.values[c.id] || ''}
+                              onChange={(e) => handleValueChange(alt.id, c.id, e.target.value)}
+                              className="cell-input"
+                              style={{ 
+                                borderColor: isInvalid ? 'var(--color-cost-text)' : 'var(--border-light)', 
+                                backgroundColor: isInvalid ? 'var(--color-cost-bg)' : '#fff',
+                                transition: 'all 0.2s ease'
+                              }}
+                              title={isScale ? "Must be an integer between 1 and 5" : "Must be a positive number"}
+                            />
+                          </div>
+                        </td>
+                      );
+                    })}
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
 
+          {!isMatrixValid && (
+            <div className="badge status-error" style={{ display: 'block', textTransform: 'none', padding: '12px 16px', fontSize: '13px', borderRadius: '8px', marginTop: '12px', textAlign: 'left', lineHeight: '1.5' }}>
+              ⚠️ <strong>Validation Warning:</strong> Some values in the decision matrix are incomplete or out of bounds. Cushioning (C1), Durability (C2), and Grip (C4) must be integers between 1 and 5. Weight and Price must be positive values.
+            </div>
+          )}
+
           <div className="actions-row">
             <button className="btn btn-secondary" onClick={() => setStep(1)}>
               ← Back to criteria
             </button>
-            <button className="btn btn-primary" onClick={() => setStep(3)}>
+            <button 
+              className="btn btn-primary" 
+              onClick={() => setStep(3)}
+              disabled={!isMatrixValid}
+            >
               ⚡ Run analysis
             </button>
           </div>
@@ -474,7 +540,9 @@ function App() {
           {/* Winner Hero Card */}
           {wpWinner && topsisWinner && (
             <div className="recommendation-card">
-              <div className="shoe-artwork">shoe shot</div>
+              <div className="shoe-artwork" style={{ padding: '0', overflow: 'hidden' }}>
+                <img src="/marathon-shoe.png" alt="Recommended Shoe" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              </div>
               <div className="rec-details">
                 <span className="badge rec-badge-winner">🏆 Recommended Winner</span>
                 <h2 className="rec-title">

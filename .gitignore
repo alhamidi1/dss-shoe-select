@@ -1,6 +1,6 @@
 # University Project Files
 *.docx
-
+*.pdf
 # Dependencies
 /node_modules
 /.pnp
