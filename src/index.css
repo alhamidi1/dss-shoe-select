@@ -548,13 +548,64 @@ body {
 }
 
 .results-formula {
+  background-color: var(--bg-main);
+  border: 1px solid var(--border-light);
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: -8px;
+  text-align: left;
+}
+
+.results-formula-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  border-bottom: 1px solid var(--border-light);
+  padding-bottom: 8px;
+}
+
+.results-formula-title span {
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--text-main);
+}
+
+.results-formula-title .badge {
+  font-size: 11px;
+}
+
+.results-formula-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.results-formula-step {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  color: var(--text-main);
+  background: var(--bg-card);
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border-light);
+}
+
+.results-formula-step code {
+  font-family: monospace;
+  font-weight: 700;
+  color: var(--color-benefit-text);
+  font-size: 13px;
+}
+
+.results-formula-expl {
   font-size: 12px;
   color: var(--text-muted);
-  font-family: monospace;
-  margin-top: -12px;
-  text-align: left;
-  border-bottom: 1px dashed var(--border-light);
-  padding-bottom: 12px;
+  line-height: 1.5;
+  margin: 0;
 }
 
 /* Ranking List */

@@ -422,7 +422,27 @@ function App() {
                 <span className="badge benefit" style={{ textTransform: 'lowercase' }}>multiplicative</span>
               </div>
               <div className="results-formula">
-                S_i = Π x_ij^w_j  (+w benefit, -w cost) → V_i = S_i / Σ S
+                <div className="results-formula-title">
+                  <span>Weighted Product Formulation</span>
+                  <span className="badge benefit" style={{ textTransform: 'uppercase', fontSize: '9px' }}>WP Method</span>
+                </div>
+                <div className="results-formula-grid">
+                  <div className="results-formula-step">
+                    <span>1. Weighted Vector (S<sub>i</sub>)</span>
+                    <code>S<sub>i</sub> = ∏ (x<sub>ij</sub>)<sup>w<sub>j</sub></sup></code>
+                  </div>
+                  <div className="results-formula-step">
+                    <span>2. Exponents (w<sub>j</sub>)</span>
+                    <code>w<sub>j</sub> &gt; 0 (benefit) / w<sub>j</sub> &lt; 0 (cost)</code>
+                  </div>
+                  <div className="results-formula-step">
+                    <span>3. Preference Score (V<sub>i</sub>)</span>
+                    <code>V<sub>i</sub> = S<sub>i</sub> / ∑ S<sub>k</sub></code>
+                  </div>
+                </div>
+                <p className="results-formula-expl">
+                  ℹ️ Multiplies scores raised to their weights. <strong>A single poor score heavily penalizes the shoe</strong>, favoring balanced all-rounders.
+                </p>
               </div>
 
               <div className="rankings-list">
@@ -455,7 +475,27 @@ function App() {
                 <span className="badge cost" style={{ textTransform: 'lowercase' }}>ideal-distance</span>
               </div>
               <div className="results-formula">
-                C = D^- / (D^+ + D^-) · closeness to ideal
+                <div className="results-formula-title">
+                  <span>TOPSIS Formulation</span>
+                  <span className="badge cost" style={{ textTransform: 'uppercase', fontSize: '9px' }}>TOPSIS Method</span>
+                </div>
+                <div className="results-formula-grid">
+                  <div className="results-formula-step">
+                    <span>1. Vector Norm (|X<sub>j</sub>|)</span>
+                    <code>|X<sub>j</sub>| = √∑ (x<sub>ij</sub>)<sup>2</sup></code>
+                  </div>
+                  <div className="results-formula-step">
+                    <span>2. Weighted Normalized (y<sub>ij</sub>)</span>
+                    <code>y<sub>ij</sub> = (x<sub>ij</sub> / |X<sub>j</sub>|) × w<sub>j</sub></code>
+                  </div>
+                  <div className="results-formula-step">
+                    <span>3. Closeness Score (C<sub>i</sub>)</span>
+                    <code>C<sub>i</sub> = D<sub>i</sub><sup>−</sup> / (D<sub>i</sub><sup>+</sup> + D<sub>i</sub><sup>−</sup>)</code>
+                  </div>
+                </div>
+                <p className="results-formula-expl">
+                  ℹ️ Measures distance to Best Ideal (D<sup>+</sup>) and Worst Ideal (D<sup>−</sup>). <strong>Rewards shoes that excel on the highest-weighted attributes.</strong>
+                </p>
               </div>
 
               <div className="rankings-list">
